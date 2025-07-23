@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getAllUsers,
+  getUserById,
   loginUser,
   myProfile,
   updateName,
@@ -13,6 +14,7 @@ router.post("/login", loginUser);
 router.post("/verify-otp", verifyOtp);
 router.put("/update-name", isAuth, updateName);
 router.get("/me", isAuth, myProfile);
+router.get("/user/:id", getUserById);
 router.get("/all", getAllUsers);
 
 export default router;

@@ -87,7 +87,7 @@ const VerifyPage = ({ email }: any) => {
                   value={digit}
                   onChange={(e) => handleChange(e, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
-                  ref={(el) => (inputRefs.current[index] = el!)}
+                  ref={(el) => (inputRefs.current[index] = el!) as any}
                   className="w-12 h-14 text-center text-white text-xl border border-gray-600 rounded-lg bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
               ))}

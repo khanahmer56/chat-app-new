@@ -117,3 +117,47 @@ export const sendMessage = TryCatch(async (req, res) => {
         sender: senderId,
     });
 });
+export const getMessagesbyChat = TryCatch(async (req, res) => {
+    const userId = req.user?._id;
+    const { chatId } = req.params;
+    if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    if (!chatId) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
+    const chats = await chat.findById(chatId);
+    if (!chats) {
+        return res.status(404).json({ message: "Chat not found" });
+    }
+    const isUserInChat = chats.users.some((user) => user.toString() === userId.toString());
+    if (!isUserInChat) {
+        return res.status(401).json({ message: "You are not in this chat" });
+    }
+    const messagesToMarkSeen = await Messages.find({
+        chatId,
+        seenBy: false,
+        sender: { $in: userId },
+    });
+    await Messages.updateMany({ chatId, seenBy: false, sender: { $in: userId } }, { seenBy: true, seenAt: new Date() });
+    const messages = await Messages.find({ chatId }).sort({ createdAt: 1 });
+    res.status(200).json({
+        messages,
+    });
+    const othersUserId = chats.users.find((user) => user != userId);
+    if (!othersUserId) {
+        res.status(400).json({ message: "No other User" });
+        return;
+    }
+    try {
+        const { data } = await axios.get(`http://localhost:5000/api/v1/user/${othersUserId}`);
+        res.json({
+            messages,
+            user: data,
+        });
+    }
+    catch (error) {
+        res.status(400).json({ message: "User not found" });
+        console.log(error);
+    }
+});
